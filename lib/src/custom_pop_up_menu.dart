@@ -282,6 +282,10 @@ class _MenuLayoutDelegate extends MultiChildLayoutDelegate {
     double anchorCenterX = anchorOffset.dx + anchorSize.width / 2;
     double anchorTopY = anchorOffset.dy;
     double anchorBottomY = anchorTopY + anchorSize.height;
+
+    double screenWidth = WidgetsBinding.instance.window.physicalSize.width / WidgetsBinding.instance.window.devicePixelRatio;
+    double screenHeight = WidgetsBinding.instance.window.physicalSize.height / WidgetsBinding.instance.window.devicePixelRatio;
+
     _MenuPosition menuPosition = _MenuPosition.bottomCenter;
 
     if (hasChild(_MenuLayoutId.content)) {
@@ -377,6 +381,19 @@ class _MenuLayoutDelegate extends MultiChildLayoutDelegate {
         );
         break;
     }
+
+    if (contentOffset.dx + contentSize.width > screenWidth) {
+      contentOffset = Offset(screenWidth - contentSize.width - 20, contentOffset.dy);
+    } else if (contentOffset.dx < 0) {
+      contentOffset = Offset(20, contentOffset.dy);
+    }
+
+    if (contentOffset.dy + contentSize.height > screenHeight) {
+      contentOffset = Offset(contentOffset.dx, screenHeight - contentSize.height - 20);
+    } else if (contentOffset.dy < 0) {
+      contentOffset = Offset(contentOffset.dx, 20);
+    }
+
     if (hasChild(_MenuLayoutId.content)) {
       positionChild(_MenuLayoutId.content, contentOffset);
     }
