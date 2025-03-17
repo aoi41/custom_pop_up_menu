@@ -354,7 +354,7 @@ class _MenuLayoutDelegate extends MultiChildLayoutDelegate {
         arrowOffset = Offset(anchorCenterX - arrowSize.width / 2,
             anchorBottomY + verticalMargin);
         contentOffset = Offset(
-          0,
+          10,
           anchorBottomY + verticalMargin + arrowSize.height,
         );
         break;
@@ -382,7 +382,7 @@ class _MenuLayoutDelegate extends MultiChildLayoutDelegate {
           anchorTopY - verticalMargin - arrowSize.height,
         );
         contentOffset = Offset(
-          0,
+          10,
           anchorTopY - verticalMargin - arrowSize.height - contentSize.height,
         );
         break;
@@ -398,22 +398,23 @@ class _MenuLayoutDelegate extends MultiChildLayoutDelegate {
         break;
     }
 
-    if (contentOffset.dx + contentSize.width > screenWidth) {
-      contentOffset = Offset(screenWidth - contentSize.width - 20, contentOffset.dy);
+    if (contentOffset.dx + contentSize.width >= screenWidth) {
+      contentOffset = Offset(screenWidth - contentSize.width - 10, contentOffset.dy);
     } else if (contentOffset.dx < 0) {
-      contentOffset = Offset(20, contentOffset.dy);
+      contentOffset = Offset(10, contentOffset.dy);
     }
 
     if (contentOffset.dy + contentSize.height > screenHeight) {
-      contentOffset = Offset(contentOffset.dx, screenHeight - contentSize.height - 20);
+      contentOffset = Offset(contentOffset.dx, screenHeight - contentSize.height - 25);
     } else if (contentOffset.dy < 0) {
-      contentOffset = Offset(contentOffset.dx, 20);
+      contentOffset = Offset(contentOffset.dx, 25);
     }
 
     if (hasChild(_MenuLayoutId.content)) {
       positionChild(_MenuLayoutId.content, contentOffset);
     }
 
+    print('contentOffset ${contentOffset.dx} ${contentOffset.dy}');
     _menuRect = Rect.fromLTWH(
       contentOffset.dx,
       contentOffset.dy,
