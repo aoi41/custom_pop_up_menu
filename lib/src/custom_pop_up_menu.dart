@@ -1,5 +1,5 @@
 import 'dart:math' as math;
-
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'platform/platform.dart';
 
@@ -60,7 +60,7 @@ class CustomPopupMenu extends StatefulWidget {
   final double verticalMargin;
   final double arrowSize;
   final CustomPopupMenuController? controller;
-  final Widget Function() menuBuilder;
+  final Widget Function(BuildContext context) menuBuilder;
   final PreferredPosition? position;
   final void Function(bool)? menuOnChange;
 
@@ -91,50 +91,63 @@ class _CustomPopupMenuState extends State<CustomPopupMenu> {
 
     _overlayEntry = OverlayEntry(
       builder: (context) {
-        Widget menu = Center(
-          child: Container(
-            constraints: BoxConstraints(
-              maxWidth: _parentBox!.size.width - 2 * widget.horizontalMargin,
-              minWidth: 0,
+        Widget menu = Stack(
+          children: [
+            Positioned(
+              left: _childBox!.localToGlobal(Offset.zero).dx,
+              top: _childBox!.localToGlobal(Offset.zero).dy,
+              child: Container(
+                width: _childBox!.size.width,
+                height: _childBox!.size.height,
+                child: widget.child,
+              )
             ),
-            child: CustomMultiChildLayout(
-              delegate: _MenuLayoutDelegate(
-                anchorSize: _childBox!.size,
-                anchorOffset: _childBox!.localToGlobal(
-                  Offset(-widget.horizontalMargin, 0),
+            Center(
+              child: Container(
+                constraints: BoxConstraints(
+                  maxWidth: _parentBox!.size.width - 2 * widget.horizontalMargin,
+                  minWidth: 0,
                 ),
-                verticalMargin: widget.verticalMargin,
-                position: widget.position,
-              ),
-              children: <Widget>[
-                if (widget.showArrow)
-                  LayoutId(
-                    id: _MenuLayoutId.arrow,
-                    child: arrow,
-                  ),
-                if (widget.showArrow)
-                  LayoutId(
-                    id: _MenuLayoutId.downArrow,
-                    child: Transform.rotate(
-                      angle: math.pi,
-                      child: arrow,
+                child: CustomMultiChildLayout(
+                  delegate: _MenuLayoutDelegate(
+                    anchorSize: _childBox!.size,
+                    anchorOffset: _childBox!.localToGlobal(
+                      Offset(-widget.horizontalMargin, 0),
                     ),
+                    verticalMargin: widget.verticalMargin,
+                    position: widget.position,
                   ),
-                LayoutId(
-                  id: _MenuLayoutId.content,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: <Widget>[
-                      Material(
-                        child: widget.menuBuilder(),
-                        color: Colors.transparent,
+                  children: <Widget>[
+                    if (widget.showArrow)
+                      LayoutId(
+                        id: _MenuLayoutId.arrow,
+                        child: arrow,
                       ),
-                    ],
-                  ),
+                    if (widget.showArrow)
+                      LayoutId(
+                        id: _MenuLayoutId.downArrow,
+                        child: Transform.rotate(
+                          angle: math.pi,
+                          child: arrow,
+                        ),
+                      ),
+                    LayoutId(
+                      id: _MenuLayoutId.content,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: <Widget>[
+                          Material(
+                            child: widget.menuBuilder(context),
+                            color: Colors.transparent,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-          ),
+              ),
+            )
+          ],
         );
         return Listener(
           behavior: widget.enablePassEvent
@@ -158,9 +171,12 @@ class _CustomPopupMenuState extends State<CustomPopupMenu> {
           child: widget.barrierColor == Colors.transparent
               ? menu
               : Container(
-                  color: widget.barrierColor,
-                  child: menu,
-                ),
+            color: widget.barrierColor,
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+              child: menu,
+            ),
+          ),
         );
       },
     );
